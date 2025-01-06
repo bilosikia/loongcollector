@@ -45,6 +45,7 @@
 #elif defined(_MSC_VER)
 #include <WinSock2.h>
 #include <Windows.h>
+#include <ws2tcpip.h>
 #endif
 
 DEFINE_FLAG_STRING(agent_host_id, "", "");
@@ -181,6 +182,7 @@ std::string GetHostName() {
     return std::string(hostname);
 }
 
+#if defined(__linux__)
 std::unordered_set<std::string> GetNicIpv4IPSet() {
     struct ifaddrs* ifAddrStruct = NULL;
     void* tmpAddrPtr = NULL;
@@ -206,6 +208,7 @@ std::unordered_set<std::string> GetNicIpv4IPSet() {
     freeifaddrs(ifAddrStruct);
     return ipSet;
 }
+#endif
 
 std::string GetHostIpByHostName() {
     std::string hostname = GetHostName();

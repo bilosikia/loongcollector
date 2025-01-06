@@ -574,8 +574,8 @@ void LogMultiBytesUnittest::TestAlignLastCharacterUTF8() {
         readerOpts.mInputType = FileReaderOptions::InputType::InputFile;
         LogFileReader logFileReader(
             "", "", DevInode(), std::make_pair(&readerOpts, &ctx), std::make_pair(&multilineOpts, &ctx));
-        std::string expectedLog = "为可观测场景而";
-        std::string testLog = expectedLog + "生";
+        std::string expectedLog = "h";
+        std::string testLog = expectedLog + "h";
         size_t result = logFileReader.AlignLastCharacter(const_cast<char*>(testLog.data()), expectedLog.size());
         APSARA_TEST_EQUAL_FATAL(expectedLog.size(), result);
     }
@@ -585,8 +585,8 @@ void LogMultiBytesUnittest::TestAlignLastCharacterUTF8() {
         readerOpts.mInputType = FileReaderOptions::InputType::InputFile;
         LogFileReader logFileReader(
             "", "", DevInode(), std::make_pair(&readerOpts, &ctx), std::make_pair(&multilineOpts, &ctx));
-        std::string expectedLog = "为可观测场景而";
-        std::string testLog = expectedLog + "生";
+        std::string expectedLog = "u";
+        std::string testLog = expectedLog + "u";
         size_t result = logFileReader.AlignLastCharacter(const_cast<char*>(testLog.data()), expectedLog.size() + 1);
         APSARA_TEST_EQUAL_FATAL(expectedLog.size(), result);
     }

@@ -2221,10 +2221,7 @@ void ProcessorParseContainerLogNativeUnittest::TestParseDockerLog() {
         bool result = ProcessorParseContainerLogNative::ParseDockerLog(buffer, size, dockerLog);
 
         APSARA_TEST_TRUE(result);
-        APSARA_TEST_STREQ("ברי צקלהHello 你好, \\u \" \\ / \b \f \n \r \t 🌍 iLogtail "
-                          "为可观测场景而生，拥有的轻量级、高性能、自动化配置等诸多生产级别特性，在阿里巴巴以及外部数万"
-                          "家阿里云客户内部广泛应用。你可以将它部署于物理机，虚拟机，Kubernetes等多种环境中来采集遥测数"
-                          "据，例如logs、traces和metrics。\n",
+        APSARA_TEST_STREQ("ברי צקלהHello 你好, \\u \" \\ / \b \f \n \r \t 🌍 iLogtail 为可观测场景而生，拥有的轻量级、高性能、自动化配置等诸多生产级别特性，在阿里巴巴以及外部数万家阿里云客户内部广泛应用。你可以将它部署于物理机，虚拟机，Kubernetes等多种环境中来采集遥测数据，例如logs、traces和metrics。\n",
                           dockerLog.log.to_string().c_str());
         APSARA_TEST_EQUAL("stdout", dockerLog.stream);
         APSARA_TEST_EQUAL("2021-12-01T00:00:00.000Z", dockerLog.time);

@@ -49,7 +49,7 @@ static std::string RapidjsonValueToString(const rapidjson::Value& value) {
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         value.Accept(writer);
-        return std::string(buffer.GetString(), buffer.GetLength());
+        return std::string(buffer.GetString(), buffer.GetSize());
     }
 }
 

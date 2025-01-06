@@ -38,10 +38,30 @@ struct CompressedLogGroup {
     CompressedLogGroup(std::string&& data, size_t rawSize) : mData(std::move(data)), mRawSize(rawSize) {}
 };
 
-template <>
-bool Serializer<std::vector<CompressedLogGroup>>::DoSerialize(std::vector<CompressedLogGroup>&& p,
-                                                              std::string& output,
-                                                              std::string& errorMsg);
+// vc++ must implement with declared, can;t implement in cpp file.
+template<>
+bool Serializer<std::vector<CompressedLogGroup>>::DoSerialize(std::vector<CompressedLogGroup>&& p, std::string& output, std::string& errorMsg) {
+	auto inputSize = 0;
+	for (auto& item : p) {
+		inputSize += item.mData.size();
+	}
+	mInItemsTotal->Add(1);
+	mInItemSizeBytes->Add(inputSize);
+
+	auto before = std::chrono::system_clock::now();
+	auto res = Serialize(std::move(p), output, errorMsg);
+	mTotalProcessMs->Add(std::chrono::system_clock::now() - before);
+
+	if (res) {
+		mOutItemsTotal->Add(1);
+		mOutItemSizeBytes->Add(output.size());
+	}
+	else {
+		mDiscardedItemsTotal->Add(1);
+		mDiscardedItemSizeBytes->Add(inputSize);
+	}
+	return res;
+}
 
 class SLSEventGroupListSerializer : public Serializer<std::vector<CompressedLogGroup>> {
 public:

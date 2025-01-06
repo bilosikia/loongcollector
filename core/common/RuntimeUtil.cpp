@@ -22,12 +22,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 #elif defined(_MSC_VER)
-#include <Psapi.h>
 #include <Windows.h>
+#include <Psapi.h>
 #endif
 #include <cstdio>
 #include <errno.h>
-
 #include <sstream>
 
 #include "FileSystemUtil.h"

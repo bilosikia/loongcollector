@@ -542,6 +542,7 @@ public:
     friend class EnterpriseSLSClientManagerUnittest;
     friend class FlusherRunnerUnittest;
     friend class PipelineUpdateUnittest;
+    friend class PollingPreservedDirDepthUnittest;
 #endif
 };
 

@@ -53,30 +53,6 @@ std::string SerializeSpanEventsToString(const SpanEvent& event) {
     return Json::writeString(writer, jsonEvents);
 }
 
-template <>
-bool Serializer<vector<CompressedLogGroup>>::DoSerialize(vector<CompressedLogGroup>&& p,
-                                                         std::string& output,
-                                                         std::string& errorMsg) {
-    auto inputSize = 0;
-    for (auto& item : p) {
-        inputSize += item.mData.size();
-    }
-    mInItemsTotal->Add(1);
-    mInItemSizeBytes->Add(inputSize);
-
-    auto before = std::chrono::system_clock::now();
-    auto res = Serialize(std::move(p), output, errorMsg);
-    mTotalProcessMs->Add(std::chrono::system_clock::now() - before);
-
-    if (res) {
-        mOutItemsTotal->Add(1);
-        mOutItemSizeBytes->Add(output.size());
-    } else {
-        mDiscardedItemsTotal->Add(1);
-        mDiscardedItemSizeBytes->Add(inputSize);
-    }
-    return res;
-}
 
 bool SLSEventGroupSerializer::Serialize(BatchedEvents&& group, string& res, string& errorMsg) {
     if (group.mEvents.empty()) {

@@ -71,6 +71,16 @@ struct LineInfo {
           forceRollbackLineFeedCount(forceRollbackLineFeedCount) {}
 };
 
+inline LineInfo MakeLineInfo(StringView data, int32_t lineBegin, int32_t lineEnd, int32_t rollbackLineFeedCount, bool fullLine) {
+	LineInfo info;
+	info.data = data;
+	info.lineBegin = lineBegin;
+	info.lineEnd = lineEnd;
+	info.rollbackLineFeedCount = rollbackLineFeedCount;
+	info.fullLine = fullLine;
+	return info;
+}
+
 class BaseLineParse {
 public:
     BaseLineParse(size_t size)
