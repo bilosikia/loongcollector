@@ -18,6 +18,7 @@
 #include <unistd.h>
 #elif defined(_MSC_VER)
 #include <Psapi.h>
+#include "common/EncodingConverter.h"
 #endif
 #include <fstream>
 #include <functional>

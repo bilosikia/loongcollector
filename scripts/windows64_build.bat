@@ -27,7 +27,7 @@ REM Change to where ilogtail-deps.windows-x64 locates
 set ILOGTAIL_DEPS_PATH=C:\workspace\ilogtail-deps.windows-x64
 set ILOGTAIL_DEPS_PATH=%ILOGTAIL_DEPS_PATH:\=/%
 REM Change to where cmake locates
-set CMAKE_BIN="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake"
+set CMAKE_BIN="C:\Program Files\CMake\bin\cmake"
 REM Change to where devenv locates
 set DEVENV_BIN="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\devenv.com"
 REM Change to where mingw locates
@@ -59,7 +59,7 @@ if not %ERRORLEVEL% == 0 (
     echo Run cmake failed.
     goto quit
 )
-%DEVENV_BIN% logtail.sln /Build "Release|x64" 1>build.stdout 2>build.stderr
+%DEVENV_BIN% loongcollector.sln /Build "Release|x64" 1>build.stdout 2>build.stderr
 if not %ERRORLEVEL% == 0 (
     echo Build iLogtail source failed.
     goto quit
@@ -73,28 +73,56 @@ del /f/s/q %ILOGTAIL_PLUGIN_SRC_PATH%\plugins\all\all.go
 del /f/s/q %ILOGTAIL_PLUGIN_SRC_PATH%\plugins\all\all_debug.go
 del /f/s/q %ILOGTAIL_PLUGIN_SRC_PATH%\plugins\all\all_windows.go
 del /f/s/q %ILOGTAIL_PLUGIN_SRC_PATH%\plugins\all\all_linux.go
-go run -mod=mod %ILOGTAIL_PLUGIN_SRC_UNIX_PATH%/tools/builder -root-dir=%ILOGTAIL_PLUGIN_SRC_UNIX_PATH% -config="plugins.yml,external_plugins.yml" -modfile="go.mod"
+go run -mod=mod %ILOGTAIL_PLUGIN_SRC_UNIX_PATH%/tools/builder -root-dir=%ILOGTAIL_PLUGIN_SRC_UNIX_PATH% -modfile="go.mod"
 echo generating plugins finished successfully
 
 REM Build plugins (GoPluginBase.dll, GoPluginBase.h)
 echo Begin to build plugins...
-IF exist %OUTPUT_DIR% ( rd /s /q %OUTPUT_DIR% )
-mkdir %OUTPUT_DIR%
-xcopy /Y %ILOGTAIL_CORE_BUILD_PATH%\plugin\Release\GoPluginAdapter.dll %ILOGTAIL_PLUGIN_SRC_PATH%\pkg\logtail
+cd %ILOGTAIL_PLUGIN_SRC_PATH%
+IF exist output ( rd /s /q output )
+mkdir output
+xcopy /Y %ILOGTAIL_CORE_BUILD_PATH%\go_pipeline\Release\GoPluginAdapter.dll %ILOGTAIL_PLUGIN_SRC_PATH%\pkg\logtail\
 set LDFLAGS="-X "github.com/alibaba/ilogtail/pluginmanager.BaseVersion=%ILOGTAIL_VERSION%""
-go build -mod=mod -buildmode=c-shared -ldflags=%LDFLAGS% -o %OUTPUT_UNIX_DIR%/GoPluginBase.dll %ILOGTAIL_PLUGIN_SRC_UNIX_PATH%/plugin_main
+go build -mod=mod -buildmode=c-shared -ldflags=%LDFLAGS% -o output\PluginBase.dll %ILOGTAIL_PLUGIN_SRC_UNIX_PATH%/plugin_main
 if not %ERRORLEVEL% == 0 (
     echo Build iLogtail plugin source failed.
     goto quit
 )
 echo Build plugins success
 
-REM Copy artifacts
-xcopy /Y %ILOGTAIL_CORE_BUILD_PATH%\Release\ilogtail.exe %OUTPUT_DIR%
-xcopy /Y %ILOGTAIL_CORE_BUILD_PATH%\plugin\Release\GoPluginAdapter.dll %OUTPUT_DIR%
-echo { >  %OUTPUT_DIR%\ilogtail_config.json & echo } >> %OUTPUT_DIR%\ilogtail_config.json
-mkdir %OUTPUT_DIR%\config\local
-cd %OUTPUT_DIR%
-dir
+REM Record git hash
+echo "git commit for" %LOGTAIL_SRC_PATH% > %PUBLISH_DIR%\git_commit.txt
+echo "git commit for" %ILOGTAIL_PLUGIN_SRC_PATH% >> %PUBLISH_DIR%\git_commit.txt
+git show >> %PUBLISH_DIR%\git_commit.txt
+
+echo %LOGTAIL_SRC_PATH%
+echo %PUBLISH_DIR%
+
+if "%BOOL_OPENSOURCE%"=="true" (
+    call :pkgOpenSource
+) else (
+    call :pkgEnterprise
+)
 
 :quit
+pause
+
+:pkgOpenSource
+xcopy /Y %ILOGTAIL_CORE_BUILD_PATH%\Release\loongcollector.exe %ILOGTAIL_PLUGIN_SRC_PATH%\output
+xcopy /Y %ILOGTAIL_CORE_BUILD_PATH%\go_pipeline\Release\GoPluginAdapter.dll %ILOGTAIL_PLUGIN_SRC_PATH%\output
+echo { >  %ILOGTAIL_PLUGIN_SRC_PATH%\output\ilogtail_config.json & echo } >> %ILOGTAIL_PLUGIN_SRC_PATH%\output\ilogtail_config.json
+goto :eof
+
+
+:pkgEnterprise
+echo "pkgEnterprise"
+
+XCOPY /s %LOGTAIL_SRC_PATH%\installer\logtail_installer %PUBLISH_DIR%\logtail_installer\
+XCOPY /s %LOGTAIL_SRC_PATH%\installer\logtail_installer_with_pdb %PUBLISH_DIR%\logtail_installer_with_pdb\
+cd %PUBLISH_DIR%\logtail_installer
+dir
+
+REM cd %OUTPUT_DIR%
+REM dir
+
+goto :eof
