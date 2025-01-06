@@ -23,6 +23,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <optional>
 
 class curl_slist;
 

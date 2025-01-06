@@ -23,7 +23,7 @@ search_files() {
             search_files "$file"
         elif [[ -f "$file" ]]; then
             unittest="${file##*_}"
-            if [ "$unittest" == "unittest" ]; then
+            if [ "$unittest" == "unittest.exe" ]; then
                 echo "============== ${file##*/} =============="
                 cd ${file%/*}
                 ./${file##*/}
